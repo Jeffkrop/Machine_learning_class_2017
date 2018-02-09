@@ -1,0 +1,75 @@
+---
+title: "Homework One"
+date: "`r format(Sys.Date())`"
+output: github_document
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(maps)
+```   
+   
+```{r, message=FALSE, warning=FALSE}
+#Read in data for homework 1 and name it Iris
+Iris <- read.csv("FisherIris_MDL.csv", header = FALSE)
+
+
+
+```   
+   
+      
+```{r}
+#Get the dimension of the dataset. 
+dim(Iris)
+```   
+There are `r nrow(Iris)` rows and `r ncol(Iris)` columns   
+   
+```{r}
+#See what rows have a 0 in the 5th column 
+which(Iris$V5 < 0)
+```    
+   
+Rows `r which(Iris$V5 < 0)` have zeros in column 5  
+   
+```{r}
+#Get only rows that are greater than zero
+Iris <- Iris %>% filter(V5 >= 0)
+
+#Get the dimension of the new dataset with zeros removed.
+dim(Iris)
+```    
+    
+After filtering Iris to remove zeros from the 5th column there are now `r nrow(Iris)` rows and `r ncol(Iris)` columns    
+   
+```{r}
+#Makes columns 1-4 new dataframe called X
+X <- Iris[,1:4]
+
+#Makes columns 5 new dataframe called Y
+Y <- Iris[,5]
+```   
+   
+      
+```{r}
+#Find minimum value for each column in X
+apply(X, 2, min)
+```   
+   
+```{r}
+#Find max of each column in X
+apply(X,2,max)
+```
+
+
+
+
+
+   
+
+
+
