@@ -1,8 +1,8 @@
 ---
 title: "Homework Two"
-name: "Jeff Kropelnicki"
-date: "`r format(Sys.Date())`"
-output: github_document
+name: Jeff Kropelnicki
+date: '`r format(Sys.Date())`'
+output: pdf_document
 ---   
    
       
@@ -98,7 +98,7 @@ Self Assessed Health Status'Poor' `r t2$coefficients[[11]]`
 Looking at the summary of the regression model if you are a male your blood pressure will be -1.47 as age goes up one blood pressure goes up 0.57, as weight goes up one blood pressure still goes down 0.35 that cant be right. As height goes up goes up one blood pressure goes up 1.33. It is interesting that is your self assessed health status is fair it goes down 2.75 but if it is good it goes up 0.58.
    
 
-###**Question 7**   
+###**Question 6**   
 #### I want to see if there are any outlies in this data. 
 ```{r}
 par(mfrow=c(2,2))
@@ -107,7 +107,7 @@ plot(t2, which=1:4)
    
 Looking at the Cooks Distance plot above it looks like row 93 could be an outliers.    
    
-###**Question 8**
+###**Question 7**
 Identify one or few useless features 
 ```{r}
 avPlots(t2, id.n=2, id.cex=0.7)

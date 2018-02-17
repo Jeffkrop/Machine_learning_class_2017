@@ -107,8 +107,6 @@ SelfAssessedHealthStatus'Fair' -2.7509682
 SelfAssessedHealthStatus'Good' 0.5863787
 SelfAssessedHealthStatus'Poor' 0.4593428
 
-Looking at the summary of the regression model before it has been normalized there are some interesting this happening, if you are a male your blood pressure will be -1.47 as your age goes up 1 year your blood pressure will go up 0.08 as your weight goes up 1 your blood pressure will go down 0.01. It is interesting that is your self assessed health status is fair it goes down 2.75 but if it is good it goes up 0.58. It is clear that some work needs to be done with this data.
-
 #### I want to see some plots of this data before is is normalized
 
 ``` r
@@ -203,17 +201,17 @@ The regression coefficients after Normalization are:
 Age 0.5791068 vs 0.0802597
 weight -0.3565445 vs -0.0134183
 height 1.3320642 vs 0.4696206
-gender Male -1.4793907 vs -1.4793907
-Location 'St. Mary's Medical Center' -0.8565008 vs -0.8565008
-Location 'VA Hospital' -1.7348405 vs -1.7348405
+gender Male -1.4793907
+Location 'St. Mary's Medical Center' -0.8565008
+Location 'VA Hospital' -1.7348405
 Smoker 9.6730871 vs 9.6730871
-Self Assessed Health Status'Fair' -2.7509682 vs -2.7509682
-Self Assessed Health Status'Good' 0.5863787 vs 0.5863787
-Self Assessed Health Status'Poor' 0.4593428 vs 0.4593428
+Self Assessed Health Status'Fair' -2.7509682
+Self Assessed Health Status'Good' 0.5863787
+Self Assessed Health Status'Poor' 0.4593428
 
 ### **Question 5**
 
-Not much changed but now as age goes up one blood pressure goes up 0.57, as weight goes up one blood pressure still goes down 0.35 that cant be right. A height goes up goes up one blood pressure goes up 1.33. Nothing changed from the fist model but the
+Looking at the summary of the regression model if you are a male your blood pressure will be -1.47 as age goes up one blood pressure goes up 0.57, as weight goes up one blood pressure still goes down 0.35 that cant be right. As height goes up goes up one blood pressure goes up 1.33. It is interesting that is your self assessed health status is fair it goes down 2.75 but if it is good it goes up 0.58.
 
 ### **Question 7**
 
