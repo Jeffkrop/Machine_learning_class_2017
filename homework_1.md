@@ -1,6 +1,8 @@
 Homework One
 ================
-2018-02-08
+2018-02-11
+
+R code for homework 1
 
 ``` r
 #Read in data for homework 1 and name it Iris

@@ -1,0 +1,135 @@
+---
+title: "Homework Two"
+name: "Jeff Kropelnicki"
+date: "`r format(Sys.Date())`"
+output: github_document
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(car)
+```    
+   
+      
+```{r}
+patients <- read.csv("patients.csv")
+pairs(Systolic~Age + Weight + Height + Gender + Location + Smoker + SelfAssessedHealthStatus, data = patients)
+```    
+   
+      
+#### Now I want to check that Gender, Smoker, Location, SelfAssessedHealthStatus are categorical with ones and zeros. To do this in R I need to see that they are factors.   
+```{r}
+str(patients) 
+```   
+#### I can see that Gender, Location, SelfAssessedHealthStatus are factors I just need to change Smoker.   
+```{r}
+patients$Smoker <- as.factor(patients$Smoker)
+str(patients)
+```   
+
+#### Run the model with out normalizing the data.    
+```{r}
+t1 <- lm(Systolic ~ Age + Weight + Height + Gender + Location + Smoker + SelfAssessedHealthStatus, data = patients)
+
+summary(t1)
+```   
+   
+The regression coefficients  are    
+Age `r t1$coefficients[[2]]`   
+weight `r t1$coefficients[[3]]`   
+height `r t1$coefficients[[4]]`   
+gender Male weight `r t1$coefficients[[5]]`   
+Location'St. Mary's Medical Center' `r t1$coefficients[[6]]`   
+Location'VA Hospital' `r t1$coefficients[[7]]`   
+Smoker `r t1$coefficients[[8]]`   
+SelfAssessedHealthStatus'Fair' `r t1$coefficients[[9]]`   
+SelfAssessedHealthStatus'Good' `r t1$coefficients[[10]]`      
+SelfAssessedHealthStatus'Poor' `r t1$coefficients[[11]]`  
+   
+#### I want to see some plots of this data before is is normalized    
+```{r}
+par(mfrow=c(2,2))
+plot(t1, which=1:4)
+```   
+   
+
+#### Set the column means to 0 and the standard deveation to 1 for Age, Height and Weight.    
+```{r}
+norm  <- patients %>% select(Age, Height, Weight)
+norm <- as.data.frame(scale(norm))
+```   
+
+The column means are `r round(colMeans(norm),3)` and the column standard deviations are `r apply(norm, 2, sd)`    
+
+#### Add the normilized Age, Height, Weight columns back 
+```{r}
+norm_patients <- patients[,-c(1,4,10)]
+norm_patients <- cbind(norm_patients, norm)
+str(norm_patients)
+```
+   
+      
+###**Question 3**  
+#### Run a new model.   
+```{r}
+
+t2 <- lm(Systolic~Age + Weight + Height + Gender + Location + Smoker + SelfAssessedHealthStatus, data = norm_patients)
+summary(t2)
+```   
+    
+       
+###**Question 4**   
+The regression coefficients after Normalization are:    
+Age `r t2$coefficients[[2]]`   vs `r t1$coefficients[[2]]`   
+weight `r t2$coefficients[[3]]` vs `r t1$coefficients[[3]]`   
+height `r t2$coefficients[[4]]` vs `r t1$coefficients[[4]]`   
+gender Male `r t2$coefficients[[5]]`    
+Location 'St. Mary's Medical Center' `r t2$coefficients[[6]]`    
+Location 'VA Hospital' `r t2$coefficients[[7]]`    
+Smoker `r t2$coefficients[[8]]` vs `r t1$coefficients[[8]]`    
+Self Assessed Health Status'Fair' `r t2$coefficients[[9]]`    
+Self Assessed Health Status'Good' `r t2$coefficients[[10]]`      
+Self Assessed Health Status'Poor' `r t2$coefficients[[11]]`     
+
+
+###**Question 5**
+Looking at the summary of the regression model if you are a male your blood pressure will be -1.47 as age goes up one blood pressure goes up 0.57, as weight goes up one blood pressure still goes down 0.35 that cant be right. As height goes up goes up one blood pressure goes up 1.33. It is interesting that is your self assessed health status is fair it goes down 2.75 but if it is good it goes up 0.58.
+   
+
+###**Question 7**   
+#### I want to see if there are any outlies in this data. 
+```{r}
+par(mfrow=c(2,2))
+plot(t2, which=1:4)
+```   
+   
+Looking at the Cooks Distance plot above it looks like row 93 could be an outliers.    
+   
+###**Question 8**
+Identify one or few useless features 
+```{r}
+avPlots(t2, id.n=2, id.cex=0.7)
+```   
+   
+Looking at the summary from the model I am getting a odd result in height I don't think this would matter for blood pressure but it says that is should. If remove values based on p-value I would only keep Smoker. looking at the added valuable plot most a of the predictors are flat which also shows that they can be removed.   
+
+
+
+
+
+
+   
+
+   
+
+
+
+
+
+
+
+
+
+

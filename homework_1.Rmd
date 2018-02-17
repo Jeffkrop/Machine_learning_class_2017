@@ -1,5 +1,6 @@
 ---
 title: "Homework One"
+name: "Jeff Kropelnicki"
 date: "`r format(Sys.Date())`"
 output: github_document
 ---   
@@ -13,6 +14,8 @@ library(ggplot2)
 library(readr)
 library(maps)
 ```   
+ 
+R code for homework 1 
    
 ```{r, message=FALSE, warning=FALSE}
 #Read in data for homework 1 and name it Iris
