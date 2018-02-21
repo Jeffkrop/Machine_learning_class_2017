@@ -1,0 +1,102 @@
+---
+title: "Ensemble Learning in R with SuperLearner"
+date: "`r format(Sys.Date())`"
+output: git hub_document
+---   
+ 
+ 
+This is an interesting machine learning tool that Data camp.com has a tutorial for. I think it could be helpful in the project for this machine learning class.
+
+httpd://WWW.data camp.com/community/tutorials/ensemble-r-machine-learning#ensemble      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(dplyr)
+library(MASS)
+library(SuperLearner)
+
+```    
+   
+In the tutorial data camp uses the data from the MASS package. 
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+train <- Pima.tr
+test <- Pima.te
+head(train)
+```   
+   
+The y variable in this dataset is type this indicates a presence of diabetes. In the dataset it is "Yes" and "No". If you are do a binomial classification problem in with Superlearner it needs to be 0 and 1 I will split out y as 0 and 1
+```{r}
+y <- as.numeric(train[,8])-1
+ytest <- as.numeric(test[,8])-1
+```   
+   
+predictors (X) and responses (Y) must be in their own data structures. I did this with y above here I will do this with x 
+```{r}
+x <- data.frame(train[,1:7])
+xtest <- data.frame(test[,1:7])
+```   
+   
+The Superlearner package is interesting as it uses models from other packages that must be installed on your computer before they can be used. For the Random Forest example in the Datacamp.com tutorial I need to installed the package ranger.   
+Here is a list of models Superlearner can do.   
+```{r}
+listWrappers()
+```
+
+Ranger algorithm is a faster implementation of the Random Forest.   
+```{r}
+install.packages("ranger")   
+
+#set the seed so that we get the same model over so I can compare models and learn.
+set.seed(150) 
+single.model <- SuperLearner(y, x, family=binomial(), SL.library = list("SL.ranger"))
+print(single.model)
+```   
+   
+   
+Ensembling with SuperLearner is done by building models in different ways then using cross validation to compare models.  
+```{r}
+set.seed(150)
+model <- SuperLearner(y, x, family=binomial(), SL.library=list("SL.ranger",  
+                                                                "SL.ksvm", 
+                                                                "SL.ipredbagg",
+                                                                "SL.bayesglm"))
+
+print(model)
+```   
+
+The zeros coefficients in the ranger model and ksvm model that Superlearner is giving them low weight. The risk is a calculation to show the right amount of risk to reduce error in the model.    
+   
+      
+each model has a specific contribution and variation to see this use.   
+```{r}
+set.seed(150)
+cv.model <- CV.SuperLearner(y, x, V=5, SL.library=list("SL.ranger",
+                                                       "SL.ksvm",
+                                                       "SL.ipredbagg",
+                                                       "SL.bayesglm"))
+
+# Print out the summary statistics
+summary(cv.model)
+```   
+The summary of cross validation shows the average risk of the model, the variation of the model and the 
+range of the risk.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
