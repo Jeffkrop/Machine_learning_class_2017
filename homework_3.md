@@ -2,6 +2,8 @@ Jeff Kropelnicki
 ================
 2018-02-27
 
+For this weeks homework my job is to find the best two predictors from the patients data from last week. I need to use the lasso method. Below is full code to get the best two predictors from a regression model of 7.
+
 ``` r
 patients <- read.csv("patients.csv")
 
@@ -35,8 +37,8 @@ t1 <- lm(Systolic ~ Age + Weight + Height + male + Marys + VA + fair + good + po
 ``` r
 library(glmnet)
 
-# Data = considering that we have a data frame named dataF, with its first column being the class
-x <- as.matrix(norm_patients[,-1]) # Removes Systolic from the dataframe and makes two matrix 
+# I need to breakup the predictors and responce make new matrix for X and Y. 
+x <- as.matrix(norm_patients[,-1]) 
 y <- as.double(as.matrix(norm_patients[, 1]))
 
 
