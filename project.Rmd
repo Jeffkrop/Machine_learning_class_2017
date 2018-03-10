@@ -1,0 +1,142 @@
+---
+title: "Team Home Mortgage"
+output:
+  pdf_document: default
+  html_document: default
+date: '`r format(Sys.Date())`'
+---   
+   
+Isaiah Soung   
+Avani Saklecha   
+Jeff Kropelnicki   
+Tom Halloin   
+Rachel Zilberm 
+   
+      
+#Problem Statement  
+   
+Home foreclosure is a serious economic issue. In the recent 2007-08 financial crisis, the Federal Reserve had to take extraordinary measures to prevent a global depression caused by homeowners who were unable to make their mortgage payments. As a result, many homeowners defaulted on their mortgage loans. In turn, several financial institutions went out of business. This data set contains a portfolio of loans originated in the last 20 years from the Minnesota Housing Finance Agency (MHFA). MHFA collaborates with individuals, communities, and partners to create, preserve, and finance affordable housing. By using machine learning techniques, we can better determine the causes of home foreclosure and find ways to preserve affordable housing.
+   
+1.	Can we predict if a loan mortgage will default and the house forecloses?
+2.	What data is most important in deciding whether a loan mortgage will default / house forecloses.
+3.	Do different loan combinations and data hurt a person’s chance at successfully paying off the loan mortgage.   
+   
+
+#Tools and Methods
+	
+We plan to use the following tools and languages:   
+1.	Python (main language) – Logistical Classification – PENDING ADD IN MORE!   
+    A:	We are going to use the main machine learning packages (numpy, sci-kit, etc) to build our models.   
+2.	Matlab & R – We plan to use these languages and tools to provide a groundwork for our final python project.   
+
+
+     
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(dplyr)
+library(readxl)
+library(knitr)
+library(xtable)
+```   
+   
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+t1 <- read_excel("/Users/jeffkropelnicki/Desktop/ProjectData and Dictrionay.xlsx")
+```   
+   
+   
+#Description of each attribute.
+         
+There are 51 columns and 27561 rows in this data set. Each row is a borrower that has a home loan with MHFA, Minnesota Housing Finance Agency.    
+Here is a list of columns that help explain this data set:  
+   
+1. **Profile:** Indicate which of the two portfolio the loan belongs to.  
+2. **KEY_MAP_HDS_HEAD_TBLKEY:** Unique key to identify a loan.
+3. **LOAN_TYP_CD:** Loan Type Code.   
+4. **Loan Type Code:** The loan type is a one of five FHA, VA, conventional uninsured, conventional insured, USDA.   
+5. **FRST_PYMT_DT:** The date the first payment of the loan was due per the note.   
+6. **CURR_PRCPL_BAL_AMT:** Current principal balance of the loan on 1/31/2018.   
+7. **HFA_AFRD_ADV_IND:** If the loan was committed after 2012, a Y indicates the loan was originated as a  HFA Preferred Risk Sharing loan product. For loans committed prior to 2012, a Y indicates the loan was originated as a HFA.   
+8. **LNDR_NM:** Name of the Lender that originated the loan.   
+9. **PROP_CNTY_NM:** Minnesota County where the purchased property is located.   
+10. **PROP_RGN_NM:** Minnesota Region where the purchased property is located.   
+11. **METRO_11_CNTY_IND:** Y if in 11-county area; otherwise N. (Anoka, Carver, Chisago, Dakota, Hennepin, Isanti, Ramsey, Scott, Sherburne, Washington, Wright)   
+12. **ORGN_LOAN_AMT:** The amount of the 1st mortgage note.
+13. **CMBN_APPR_AMT:** Combined Appraisal Amt.   
+14. **CMBN_PRCH_PRIC_AMT:** Purchase Price of subject property - the amount from the purchase agreement.
+15. **HSHD_EMRG_MRKT_IND:** Household Emerging Market Y if borrower or any co-borrower is Hispanic, Asian, Black, Indian or Pacific; otherwise blank.  
+16. **SRC_SYS_MO_INCM_AMT:** Household Monthly Qualifying Income.
+17. **SRC_SYS_MO_HSNG_EXPNS_AMT:** Monthly Housing Expenses: The amount the borrower pays each month for principal, interest, taxes, hazard insurance, mortgage insurance, association dues and other monthly housing expenses.  documented on the 1003 as monthly housing expenses to be included in underwriting the loan. Used to calculate the front end or housing ratio.   
+18. **SRC_SYS_MO_DEBT_AMT:** Monthly Debt: The amount the borrower pays each month for housing and debts.  This includes automobile loans, revolving charge accounts, additional real estate loans, alimony, child support, etc. This is the total amount considered to calculate long term debt by the underwriter.   
+19. **HAF_LOAN_AMT:** The total amount of the HAF loan.   
+20. **BRWR_CRDT_SCR_NUM:** The borrower's credit score that the lender used to underwrite the loan. 
+21. **LOAN_TRM_NUM:** Loan Term in months.   
+22. **MRTG_INSR_PCT:** Mortgage interest rate.    
+23. **ANNL_INTRST_RATE_PCT:** Annual interest rate.   
+24. **PRCPL_INTRST_AMT:** Principal and Interest amount.   
+25. **CLOSE_DT:** Closing Date. 
+26. **Forecolosure:** No, In Foreclosure, Foreclosed or Unknown   
+    
+       
+
+#Some general statistics of the dataset  
+Here is a closer look at some of the data. 
+look at the number of different loans **"Indicate which of the 2 portfolio the loan belongs to"**   
+```{r, echo = FALSE, results = 'asis', warning = F}
+
+t2 <- t1 %>% group_by(PORTFOLIO) %>% 
+            summarise(count = n()) 
+
+t3 <- t1 %>% group_by(LOAN_TYPE_TXT) %>%
+            summarise(count = n())
+
+x1 <- kable(t2, format = 'latex')
+x2 <- kable(t3, format = 'latex')
+cat(c("\\begin{table}[h] \\centering ", 
+      x1,
+    "\\hspace{2cm} \\centering ",
+      x2,
+    "\\caption{My tables} \\end{table}")) 
+```   
+    
+
+```{r, echo = FALSE}
+par(mfrow=c(1,3))
+hist(t1$CURR_PRCPL_BAL_AMT, main = "Current Principal Balance")
+hist(t1$ANNL_INTRST_RATE_PCT, main = "Annual Interest Rate")
+hist(t1$BRWR_CRDT_SCR_NUM, main = "Borrower's Credit Score")
+```   
+   
+**Top 10 Lenders that originated the loan**
+```{r, echo=FALSE}
+t4 <- t1 %>% group_by(LNDR_NM) %>% 
+             summarise(count = n()) %>% 
+             top_n(10, wt = count) %>% 
+             arrange(desc(count))
+
+kable(t4)
+```   
+   
+      
+  
+ 
+   
+**Look at the number of in forecolosure or forecolosed**
+```{r, echo = FALSE, results = 'asis', warning = F}
+t5 <- t1 %>% group_by(Forecolosure) %>% 
+              summarise(count = n()) %>% 
+              arrange(desc(count))
+t6 <- t1 %>% group_by(PORTFOLIO, Forecolosure) %>%
+            summarise(count = n())
+
+
+x3 <- kable(t5, format = 'latex')
+x4 <- kable(t6, format = 'latex')
+cat(c("\\begin{table}[h] \\centering ", 
+      x3,
+    "\\hspace{2cm} \\centering ",
+      x4,
+    "\\caption{My tables} \\end{table}")) 
+```
+
+
+
+
