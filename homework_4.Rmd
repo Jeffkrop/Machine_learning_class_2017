@@ -1,0 +1,105 @@
+---
+author: "Jeff Kropelnicki"
+title: "Homework 4"
+date: "`r format(Sys.Date())`"
+output:
+  html_document: default
+  pdf_document: default
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(dplyr)
+library(tidyr)
+library(kableExtra)
+library(readxl)
+library(glmnet)
+```   
+   
+      
+Import the cell DNA data  
+```{r, message=FALSE, warning=FALSE}
+data <- read_excel("CellDNA.xls", col_names = FALSE)
+```   
+   
+
+Standerize the cell data and make the last column a 0 or 1. If a number is greater than 0 make it a 1.    
+```{r}
+#Make any number is the last column a 0 or 1
+data$X__14[ data$X__14 > 0 ] = 1
+
+#Normalize the data is the X columns 1-13
+norm <- data[,1:13]
+x <- as.matrix(scale(norm))
+y <- as.matrix(data[,14])
+
+#Take a look at the data
+quick_look <- as.data.frame(cbind(x,y))
+
+kable(head(quick_look), "html") %>%
+          kable_styling(bootstrap_options = "striped", font_size = 10)
+```   
+   
+      
+```{r}
+#Build the lasso L1 model
+set.seed(999)
+glmmod <- cv.glmnet(x, y, alpha=1, nfolds = 10, family="binomial")
+
+
+par(mfrow=c(1,2))
+plot(glmmod)
+plot(glmmod$glmnet.fit, xvar="lambda", label = TRUE)
+```   
+   
+Lets see what the lambdas are for the min and 1 standard deviation from the min are 
+```{r}
+#The min 
+t1 <- round(glmmod$lambda.min, 6)
+#1 SD from the min
+t2 <- round(glmmod$lambda.1se, 8)
+```   
+
+The minimum lambda is `r t1` and the lambda that is one standard deviation from the minimum is `r t2`   
+   
+```{r}
+#predictors at mim lambda
+coef(glmmod, s=glmmod$lambda.min)
+```   
+At the minimum lambda 0.00024 there are 11 predictors. 
+   
+      
+         
+Lets see what predictors are selected with lambda this is one standard deviation from the minimum.  
+```{r}
+#predictors at 1 sd from min lambda
+coef(glmmod, s=glmmod$lambda.1se)
+```   
+At the lambda 0.0068 that is one standard deviation away from the minimum lambda there are 4 predictors.    
+   
+**Question 2**   
+Looking the the predictors from the lambda = one standard deviation 0.0068 I see that the largest are X__7, X__5 and X__4. Meaning if I pick a lambda that is above the one standard deviation I will get these three.   
+   
+   
+**Question 3**  
+Seeing that the lambda that is one standard deviation away from the minimum lambda returns 4 predictors I know that I will have to pick a lambda that is larger than 0.0068. Meaning I will be outside the two lines on the plot above.   
+
+```{r}
+my_coef <- coef(glmmod, s=.0079)
+print(my_coef)
+```   
+Picking a lambda of .0079 returns three predictors X__7, X__5 and X__4.
+   
+**Question 4**
+```{r}
+t3 <- data.frame(name = my_coef@Dimnames[[1]][my_coef@i + 1], coefficient = my_coef@x)
+print(t3)
+```   
+The coefficient that are returned at lambda equil to .0079 are X__4 is 2.71673979, X__5 is -2.45651480, and X__7 is -0.03262433   
+
+
+
+
+
+
