@@ -1,0 +1,116 @@
+---
+title: "Homework 5"
+author: "Jeff Kropelnicki"
+date: '`r format(Sys.Date())`'
+output:
+  html_document: default
+  pdf_document: default
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(dplyr)
+library(kableExtra)
+library(readxl)
+library(e1071)
+```   
+   
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+data <- read_excel("CellDNA.xls", col_names = FALSE)
+```   
+   
+      
+Standerize the cell data and make the last column a 0 or 1. If a number is greater than 0 make it a 1.    
+```{r}
+#Make any number is the last column a 0 or 1
+data$X__14[ data$X__14 > 0 ] = 1
+
+#Normalize the data is the X columns 1-13
+norm <- data[,1:13]
+x <- as.matrix(scale(norm))
+y <- as.matrix(data[,14])
+
+#Take a look at the data
+quick_look <- as.data.frame(cbind(x,y))
+
+kable(head(quick_look), "html") %>%
+          kable_styling(bootstrap_options = "striped", font_size = 10)
+```     
+   
+      
+```{r}
+#Build and run the SVM model with the e1071 package. This is a linear classification SVM model with a cost of 10. Cost is the cost of miss classifications.  
+set.seed(777)
+model <- svm(factor(X__14) ~ ., data = quick_look, type='C-classification', kernel='linear',scale=FALSE, cost = 10) 
+summary(model)
+```   
+**Question 1**   
+There are `r model$tot.nSV` support vectors. There are `r model$nSV[1]` in the 0 class and `r model$nSV[2]` in the 1 class.
+   
+      
+```{r}
+#The weight overall is 
+w <- as.vector(t(model$coefs) %*% model$SV)
+b <- -model$rho
+p <- model$SV
+```   
+   
+**Question 2:** List top 3 records that have the smallest **absolute** values from $w^TX + b$.      
+```{r}
+#Return the co
+t1 <- as.data.frame(abs(model$coefs)) %>%
+      arrange(V1)
+kable(head(t1, n = 3), "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```   
+   
+      
+```{r}
+#Do a prediction for 131, 165, 892, 1057 
+newdata = quick_look[c(131, 165, 892, 1057), ]
+predict(model, newdata)
+pred <- predict(model, newdata)
+
+table(Actual=newdata$X__14, Fitted=pred)
+
+#Theta for 131
+z131 <- as.vector(sum(t(quick_look[131, -14])*w)+b)
+
+#Theta for 165
+z165 <- as.vector(sum(t(quick_look[165, -14])*w)+b)
+
+#Theta for 892
+z892 <- as.vector(sum(t(quick_look[892, -14])*w)+b)
+
+#Theta for 1057
+z1057 <- as.vector(sum(t(quick_look[1057, -14])*w)+b)
+```   
+   
+      
+**Question 3:**   
+The $w^TX + b$” values for the record 131 is `r z131`   
+The $w^TX + b$” values for the record 165 is `r z165`   
+The $w^TX + b$” values for the record 892 is `r z892`   
+The $w^TX + b$” values for the record 1057 is `r z1057`    
+The 0 varibles 131 and 1057 are on the positive side of the model and 1 varibles 165 and 892 are on the negitive side of the model. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
