@@ -1,0 +1,132 @@
+---
+title: "Homework 6"
+author: "Jeff Kropelnicki"
+date: '`r format(Sys.Date())`'
+output:
+  html_document: default
+  pdf_document: default
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(dplyr)
+library(kableExtra)
+library(readxl)
+library(kernlab)
+library(e1071)
+library(gplots)
+library (ROCR)
+library(caret)
+```   
+   
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#Read in data.
+data <- read_excel("CellDNA.xls", col_names = FALSE)
+```   
+   
+      
+Standerize the cell data and make the last column a 0 or 1. If a number is greater than 0 make it a 1.    
+```{r}
+#Make any number is the last column a 0 or 1
+data$X__14[ data$X__14 > 0 ] = 1
+
+#Normalize the data is the X columns 1-13
+norm <- data[,1:13]
+x <- as.matrix(scale(norm))
+y <- as.matrix(data[,14])
+
+#Take a look at the data
+data <- as.data.frame(cbind(x,y))
+
+kable(head(data), "html") %>%
+          kable_styling(bootstrap_options = "striped", font_size = 10)
+```    
+  
+  
+```{r}
+## Create a kernel function using the build in rbfdot function
+rbf <- rbfdot(sigma=0.1)
+## train a bound constraint support vector machine
+set.seed(777)
+model <- ksvm(X__14~.,data=data,type="C-bsvc", kernel=rbf,C=10, prob.model = TRUE)
+
+print(model)
+
+pred <- predict(model, x)
+
+# Check accuracy:
+confusionMatrix(data$X__14, predict(model), mode = "prec_recall", positive="1")
+
+
+
+```   
+     
+   
+   
+```{r}
+set.seed(777)
+t1 <- svm(X__14~., data=data, kernel="radial", cost=5, scale=F)
+
+fitted <- attributes(predict(t1, x, decision.values=T))$decision.values
+
+
+rocplot <- function(pred, truth, ...){
+  predob =  prediction(pred, truth)
+  perf = performance(predob, 'tpr', 'fpr')
+  plot(perf, ...)
+}
+
+
+rocplot(fitted, y)
+
+
+
+# ROC area under the curve
+roc_zero <- prediction(pred, y)
+auc.tmp <- performance(roc_zero,"auc")
+t2 <- as.numeric(auc.tmp@y.values)
+```
+
+the area under the curve is `r t2`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
