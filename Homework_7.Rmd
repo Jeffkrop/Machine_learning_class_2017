@@ -1,0 +1,130 @@
+---
+title: "Homework 7"
+author: "Jeff Kropelnicki"
+date: '`r format(Sys.Date())`'
+output:
+  html_document: default
+  pdf_document: default
+---   
+   
+      
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(dplyr)
+library(kableExtra)
+library(readxl)
+library(gplots)
+library (ROCR)
+library(caret)
+library(nnet)
+library(neuralnet)
+```   
+   
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#Read in data.
+data <- read_excel("CellDNA.xls", col_names = FALSE)
+```   
+   
+      
+Standerize the cell data and make the last column a 0 or 1. If a number is greater than 0 make it a 1.    
+```{r}
+#Make any number is the last column a 0 or 1
+data$X__14[ data$X__14 > 0 ] = 1
+
+#Normalize the data is the X columns 1-13
+norm <- data[,1:13]
+x <- as.matrix(scale(norm))
+y <- as.matrix(data[,14])
+
+#Take a look at the data
+data <- as.data.frame(cbind(x,y))
+
+kable(head(data), "html") %>%
+          kable_styling(bootstrap_options = "striped", font_size = 10)
+
+
+#Create the test and train data set here I use 70% for the training set
+set.seed(777)
+train1<-createDataPartition(data$X__14,p=0.7,list=FALSE)
+train<-data[train1,]
+test<-data[-train1,]
+train$X__14 <- as.factor(train$X__14)
+test$X__14 <- as.factor(test$X__14)
+
+
+train$Y = class.ind(train$X__14)
+train$X__14=NULL
+```    
+   
+      
+```{r}
+#Create the first neural network on the train data
+train.nnet <- nnet(Y~.,train, size=20, rang=0.07, Hess=FALSE, decay=15e-4, maxit=250, softmax = T, entropy=TRUE)
+
+#Use test data to predict 
+set.seed(777)
+test.nnet<-predict(train.nnet,test,type=("class"))
+#Print the table
+table(test$X__14, test.nnet)
+
+confusionMatrix(as.factor(test.nnet), test$X__14, mode = "prec_recall", positive="0")
+confusionMatrix(as.factor(test.nnet), test$X__14, mode = "prec_recall", positive="1")
+```   
+Class 0   
+Accuracy = 0.8986301  
+Precision = 0.9455782    
+Recall = 0.9297659   
+   
+Class 1   
+Accuracy = 0.8986301   
+Precision = 0.7042254          
+Recall = 0.7575758  
+   
+Here I use a different r package because I want to see a plot of the neural net and get the ROC curve.      
+```{r}
+#This neural net needs data in a matrix
+m <- model.matrix(  ~ Y + X__1 + X__2 + X__3 + X__4 + X__5 + 
+                      X__6 + X__7 + X__8 + X__9 + X__10 + X__11 + X__12 + X__13, data=train)
+
+
+#Make a second neural net with the matrix training data
+nn <- neuralnet(Y1 ~ X__1 + X__2 + X__3 + X__4 + X__5 + X__6 + X__7 + 
+                X__8 + X__9 + X__10 + X__11 + X__12 + X__13, 
+                data=m, hidden=c(5,2), linear.output=FALSE, threshold=0.01)
+
+#Plot the neural net
+plot(nn)
+
+
+#Subset data for a new test set for prediction
+temp_test <- subset(test, select = c("X__1", "X__2", "X__3", "X__4", "X__5", "X__6", "X__7", 
+                                     "X__8", "X__9", "X__10", "X__11", "X__12", "X__13"))
+
+#Use test data to predict 
+nn.results <- compute(nn, temp_test)
+nn.results <- nn.results$net.result
+
+detach(package:neuralnet,unload = T)
+```   
+   
+ 
+ 
+This is code to get ROC curve I could not find a way to get both ROC curves in R. Over the last 2 homeworks there is no talk about 2 on the internet that I can find.       
+```{r}
+nn.pred = prediction(nn.results, test$X__14)
+pref <- performance(nn.pred, "tpr", "fpr")
+plot(pref)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
